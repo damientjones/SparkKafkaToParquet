@@ -2,9 +2,10 @@
 
 ## Sample JSON messages:
 
-OBJ1
+OBJ1:
 {"string":"99224","time":1572006802000,"int":3969,"bool":false}
-OBJ2
+
+OBJ2:
 {"time":1572006802000,"string":"99224","int":3969,"bool":false}
 
 ## Inputs to main method:
