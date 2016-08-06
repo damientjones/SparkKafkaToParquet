@@ -1,14 +1,16 @@
 package app
 
 import app.util.{CreateParquet, KafkaStream, SparkConfig, ConfigUtil}
-
+import app.util.WriteMetrics
 object MainObject {
 
   def build (inputTopic:String,propsFile:String) = {
     ConfigUtil.setAppVars(inputTopic,propsFile)
     SparkConfig.createContext
     KafkaStream.createStream
-    SparkConfig.getStreamingContext
+    val ssc = SparkConfig.getStreamingContext
+    ssc.addStreamingListener(new WriteMetrics)
+    ssc
   }
 
   def getFileName (implicit appName : String): String = {

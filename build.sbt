@@ -13,7 +13,7 @@ libraryDependencies ++= Seq(spark %% "spark-streaming" % snapshot, //%% adds pro
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
-mainClass in assembly := Some("usps.iv.ops.MainObject")
+mainClass in assembly := Some("app.MainObject")
 
 assemblyMergeStrategy in assembly := {
   case x if x.startsWith("META-INF") => MergeStrategy.discard
