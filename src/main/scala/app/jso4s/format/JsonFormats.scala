@@ -16,7 +16,7 @@ trait JsonFormats {
       case JInt(i) => timeStampFromLong(i)
     },
     {
-      case d: Date => JString(d.toString())
+      case d: Date => JString(d.toString)
     }
     )
   )

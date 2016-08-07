@@ -1,7 +1,7 @@
 package app.util
 
-import scala.io.Source
 import scala.collection.mutable.HashMap
+import scala.io.Source
 
 object ConfigUtil {
 

@@ -3,7 +3,7 @@ package app.util
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 
-import app.schema.{Obj2, Obj1}
+import app.schema.{Obj1, Obj2}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.functions.udf

@@ -5,7 +5,7 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 object SparkConfig {
-  private var sparkConf : SparkConf = null;
+  private var sparkConf: SparkConf = null
   private var streamingContext : StreamingContext = null
   private var sqlContext : SQLContext = null
 

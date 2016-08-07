@@ -1,7 +1,7 @@
 package app
 
-import app.util.{CreateParquet, KafkaStream, SparkConfig, ConfigUtil}
-import app.util.WriteMetrics
+import app.metrics.{SparkMetrics, StreamingMetrics}
+import app.util.{ConfigUtil, CreateParquet, KafkaStream, SparkConfig}
 object MainObject {
 
   def build (inputTopic:String,propsFile:String) = {
@@ -9,7 +9,8 @@ object MainObject {
     SparkConfig.createContext
     KafkaStream.createStream
     val ssc = SparkConfig.getStreamingContext
-    ssc.addStreamingListener(new WriteMetrics)
+    ssc.addStreamingListener(new StreamingMetrics) //Streaming metrics class
+    ssc.sparkContext.addSparkListener(new SparkMetrics) //Spark metrics class
     ssc
   }
 
