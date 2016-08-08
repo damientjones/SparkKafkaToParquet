@@ -24,7 +24,7 @@ The parquet files will also be partitioned by extracting YYYYMMDD from the time 
 Project uses SBT Assembly and will create an UBER Jar, label dependencies as provided as needed
 
 ##Sample Kafka Commands
-#Windows (Unix/Linux are similar)
+###Windows (Unix/Linux are similar)
 .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
 
 .\bin\windows\kafka-server-start.bat .\config\server.properties
