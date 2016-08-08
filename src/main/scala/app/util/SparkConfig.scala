@@ -13,7 +13,13 @@ object SparkConfig {
     if (sparkConf == null) {
       sparkConf = new SparkConf().setAppName(ConfigUtil("appName")).setMaster(ConfigUtil("master"))
       streamingContext = new StreamingContext(sparkConf,Seconds(ConfigUtil("batchSize").toInt))
-      sqlContext = new SQLContext(streamingContext.sparkContext)
+      val sc = streamingContext.sparkContext
+      sqlContext = new SQLContext(sc)
+      println("Application Name: " + sc.appName)
+      println("Application id: " + sc.applicationId)
+      println("Master URL: " + sc.master)
+      println("Spark Version: " + sc.version)
+      println("Spark user: " + sc.sparkUser)
     }
   }
 

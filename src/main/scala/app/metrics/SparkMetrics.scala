@@ -4,9 +4,10 @@ import org.apache.spark.scheduler._
 
 class SparkMetrics extends SparkListener {
 
+  //batch -> job -> stage -> executor
+
   override def onJobStart(jobStart: SparkListenerJobStart) {
     println("job started: " + jobStart.jobId)
-
   }
 
   override def onJobEnd(jobEnd: SparkListenerJobEnd) {
