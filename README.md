@@ -12,6 +12,9 @@ OBJ2:
 Topic name, properties file:
 ex: OBJ1 c:\app.properties
 
+## The project includes a StreamingListener and a SparkListener
+These will print out messages. This can also be used to log metrics to the log file or to a database table.
+
 ## A few notes
 
 If using the default app.properties file the parquet files will be written to C:\data\OBJ1
