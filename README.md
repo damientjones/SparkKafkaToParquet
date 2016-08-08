@@ -25,9 +25,9 @@ Project uses SBT Assembly and will create an UBER Jar, label dependencies as pro
 
 ##Sample Kafka Commands
 ###Windows (Unix/Linux are similar)
-.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties \n
-.\bin\windows\kafka-server-start.bat .\config\server.properties \n
-.\bin\windows\kafka-topics.bat --create --topic OBJ1 --zookeeper localhost:2181 --replication-factor 1 --partitions 1 \n
-.\bin\windows\kafka-topics.bat --list --zookeeper localhost:2181 \n
-.\bin\windows\kafka-console-producer.bat --broker-list localhost:9092 --topic OBJ1 \n
+.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties <br />
+.\bin\windows\kafka-server-start.bat .\config\server.properties <br />
+.\bin\windows\kafka-topics.bat --create --topic OBJ1 --zookeeper localhost:2181 --replication-factor 1 --partitions 1 <br />
+.\bin\windows\kafka-topics.bat --list --zookeeper localhost:2181 <br />
+.\bin\windows\kafka-console-producer.bat --broker-list localhost:9092 --topic OBJ1 <br />
 .\bin\windows\kafka-console-consumer.bat --zookeeper localhost:2181 --topic OBJ1
