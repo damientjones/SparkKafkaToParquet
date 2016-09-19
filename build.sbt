@@ -8,8 +8,10 @@ val spark = "org.apache.spark"
 val snapshot = "1.5.1"
 
 libraryDependencies ++= Seq(spark %% "spark-streaming" % snapshot, //%% adds project scala version to artifact name
+  spark %% "spark-streaming-kafka" % snapshot,
   spark %% "spark-sql" % snapshot,
-  spark %% "spark-streaming-kafka" % snapshot)
+  "org.yaml" % "snakeyaml" % "1.17",
+  "com.datastax.spark" %% "spark-cassandra-connector" % snapshot)
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 

@@ -1,7 +1,8 @@
-package app.jso4s.format
+package app.schema.format
 
 import java.sql.{Date, Timestamp}
 
+import app.enums.ObjType
 import org.json4s.JsonAST.{JInt, JString}
 import org.json4s.{CustomSerializer, DefaultFormats}
 
@@ -21,5 +22,5 @@ trait JsonFormats {
     )
   )
 
-  implicit val formats =  DefaultFormats + DateSerializer
+  implicit val formats = DefaultFormats + DateSerializer + new EnumSerializer[ObjType]
 }

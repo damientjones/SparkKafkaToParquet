@@ -2,9 +2,9 @@ package app.metrics
 
 import org.apache.spark.scheduler._
 
-class SparkMetrics extends SparkListener {
+protected class SparkMetrics extends SparkListener {
 
-  //batch -> job -> stage -> executor
+  private var executorInfo: String = null
 
   override def onJobStart(jobStart: SparkListenerJobStart) {
     println("job started: " + jobStart.jobId)
@@ -16,7 +16,6 @@ class SparkMetrics extends SparkListener {
 
   override def onStageCompleted(stageCompleted: SparkListenerStageCompleted) {
     println("stage completed on attempt: " + stageCompleted.stageInfo.attemptId)
-
   }
 
   override def onStageSubmitted(stageSubmitted: SparkListenerStageSubmitted) {
@@ -28,19 +27,19 @@ class SparkMetrics extends SparkListener {
     println("task started, task id: " + taskStart.taskInfo.taskId)
   }
 
-  override def onTaskEnd(taskEnd: SparkListenerTaskEnd) {
-    println("task ended duration: " + taskEnd.taskInfo.duration + "ms")
+}
+
+object SparkMetrics {
+  var metrics: SparkMetrics = null
+
+  def getMetrics: SparkMetrics = {
+    if (metrics == null) {
+      metrics = new SparkMetrics
+    }
+    metrics
   }
 
-  override def onExecutorMetricsUpdate(executorMetricsUpdate: SparkListenerExecutorMetricsUpdate) {
-    println("executor metrics update for executor: " + executorMetricsUpdate.execId)
-  }
-
-  override def onExecutorAdded(executorAdded: SparkListenerExecutorAdded) {
-    println("executor added on host: " + executorAdded.executorInfo.executorHost)
-  }
-
-  override def onExecutorRemoved(executorRemoved: SparkListenerExecutorRemoved) {
-    println("executor removed")
+  def setExecutorInfo(info: String) {
+    metrics.executorInfo = info
   }
 }

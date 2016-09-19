@@ -1,0 +1,27 @@
+#app parameters
+master: local[*]
+directory: c:\\data\\
+offsets: LATEST
+
+#spark parameters
+sparkConfigs:
+    spark.cassandra.connection.host: 127.0.0.1
+    spark.cassandra.auth.username: cassandra
+    spark.cassandra.auth.password: cassandra
+    #spark.cassandra.connection.local_dc: --use if you have more than one data center
+    spark.cassandra.connection.keep_alive_ms: 180000
+    spark.cassandra.input.consistency.level: LOCAL_QUORUM
+#kafka configs
+kafkaAppConfigs:
+    obj1App:
+        brokerList: localhost:9092
+        topicList: OBJ1
+        batchInterval: "10"
+        batchIntervalUnit: Seconds
+        consumerGroup: group
+#cassandra tables
+cassandraTables:
+    checkpoint:
+        table: checkpoint
+        keyspace: test_keyspace
+        fields: app_name,topic_name,partition,checkpoint_time,start_offset,end_offset

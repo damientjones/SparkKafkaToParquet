@@ -2,7 +2,7 @@ package app.schema
 
 import java.sql.Timestamp
 
-import app.jso4s.format.JsonFormats
+import app.schema.format.JsonFormats
 import com.fasterxml.jackson.databind.JsonMappingException
 import org.json4s.jackson.JsonMethods._
 
