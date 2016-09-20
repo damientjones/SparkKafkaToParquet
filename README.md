@@ -13,14 +13,16 @@ ex: obj1App
 These will print out messages. This can also be used to log metrics to the log file or to a database table.
 
 ## A few notes
-
-If using the default config.yaml file the parquet files will be written to C:\data\OBJ1
-
-The parquet files will also be partitioned by extracting YYYYMMDD from the time field
-
-Project uses SBT Assembly and will create an UBER Jar, label dependencies as provided as needed
-
-This project depends on a Cassandra instance as well as the tables in the tables.sql file existing
+<UL>
+<LI>If using the default config.yaml file the parquet files will be written to C:\data\OBJ1
+<LI>The parquet files will also be partitioned by extracting YYYYMMDD from the time field
+<LI>Project uses SBT Assembly and will create an UBER Jar, label dependencies as provided as needed
+<LI>This project depends on a Cassandra instance as well as the tables in the tables.sql file existing
+<LI>Direct stream uses a custom message handler that includes the topic name and offsets along with the key and message
+<UL>
+<LI>Please see createStream in KafkaUtil for usage and custom object
+</UL>
+</UL>
 
 ## General KafkaDirectStream information:
 The application manages offsets by syncing them with the Cassandra table test_keyspace.checkpoint. <br />
