@@ -1,7 +1,7 @@
 #app parameters
 master: local[*]
 directory: c:\\data\\
-offsets: LATEST
+offsetOverride: EARLIEST
 
 #spark parameters
 sparkConfigs:

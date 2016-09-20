@@ -1,5 +1,7 @@
 package app.schema
 
+import java.util.Date
+
 import app.util.{CassandraUtil, SparkContextUtil, YamlUtil}
 import kafka.common.TopicAndPartition
 import org.apache.spark.sql.Row
@@ -39,12 +41,12 @@ object Checkpoint {
       Some(date))
   }
 
-  def writeOffsets(appName: String, offsets: Array[OffsetRange]) {
-    writeToCassandra(offsets.map(x => apply(appName, x)))
+  def writeOffsets(offsets: AppOffsets) {
+    writeToCassandra(offsets.offsets.get.map(x => apply(offsets.appName, x)))
   }
 
-  def completeOffsets(appName: String, offsets: Array[OffsetRange]) {
-    writeToCassandra(offsets.map(x => apply(appName, x, System.currentTimeMillis())))
+  def completeOffsets(offsets: AppOffsets) {
+    writeToCassandra(offsets.offsets.get.map(x => apply(offsets.appName, x, System.currentTimeMillis())))
   }
 
   private def toSnakeCase(field: String) = field.replaceAll("(.)(\\p{Upper})", "$1_$2").toLowerCase().replace("$", "")
@@ -57,23 +59,28 @@ object Checkpoint {
     val checkPoint = Checkpoint(row.getAs[String]("app_name"),
       row.getAs[String]("topic_name"),
       row.getAs[Int]("partition"),
-      row.getAs[Long]("checkpoint_time"),
+      row.getAs[Date]("checkpoint_time").getTime,
       row.getAs[Long]("start_offset"),
       row.getAs[Long]("end_offset"))
     ((checkPoint.app_name, checkPoint.topic_name, checkPoint.partition), checkPoint)
   }
 
   private def getData = {
-    CassandraUtil.getDataframe("checkpoint").map(x => map(x)).collectAsMap()
+    CassandraUtil.getDataframe("checkpoint").map(x => map(x)).collectAsMap().toMap
   }
 
-  def getOffsets(topicPartitionSet: Set[TopicAndPartition]): Map[TopicAndPartition, Long] = {
+  private def evalOffset = (checkpoint: Checkpoint) => {
+    checkpoint.completion_time match {
+      case None => checkpoint.start_offset
+      case _ => checkpoint.end_offset
+    }
+  }
+
+  def getOffsets(topicPartitionSet: Set[TopicAndPartition]): Map[TopicAndPartition, Option[Long]] = {
     val checkpoints = getData
     val appName = YamlUtil.getConfigs.getAppName
     topicPartitionSet.map(x => {
-      val offset = checkpoints.getOrElse((appName, x.topic, x.partition), null)
-      (x, offset)
-    })
-    null
+      (x, checkpoints.get(appName, x.topic, x.partition).map(x => evalOffset(x)))
+    }).toMap
   }
 }

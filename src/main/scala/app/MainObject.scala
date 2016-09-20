@@ -1,9 +1,9 @@
 package app
 
 import app.metrics.{SparkMetrics, StreamingMetrics}
-import app.schema.{Checkpoint, KafkaMessage}
+import app.schema.{AppOffsets, Checkpoint, KafkaMessage}
 import app.util._
-import org.apache.spark.streaming.kafka.{HasOffsetRanges, KafkaUtil, OffsetRange}
+import org.apache.spark.streaming.kafka.KafkaUtil
 
 object MainObject {
 
@@ -23,16 +23,16 @@ object MainObject {
   def main (args:Array[String]): Unit = {
     val ssc = build(args(0))
     implicit val appName = YamlUtil.getConfigs.getAppName
-    var offsets: Array[OffsetRange] = null
+    val offsets = AppOffsets(appName, None)
     val stream = KafkaUtil.getStream
     stream.foreachRDD { rdd =>
-      offsets = rdd.asInstanceOf[HasOffsetRanges].offsetRanges
-      Checkpoint.writeOffsets(appName, offsets)
+      offsets.offsets = Some(KafkaUtil.getOffsets(rdd))
+      Checkpoint.writeOffsets(offsets)
     }
     stream.flatMap(x => getJson(x))
       .foreachRDD(x => {
         CreateParquetUtil.writeFile(x)
-        Checkpoint.completeOffsets(appName, offsets)
+        Checkpoint.completeOffsets(offsets)
       })
     ssc.start()
     ssc.awaitTermination()
