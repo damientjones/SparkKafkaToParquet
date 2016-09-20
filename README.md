@@ -24,12 +24,18 @@ This project depends on a Cassandra instance as well as the tables in the tables
 
 ## General KafkaDirectStream information:
 The application manages offsets by syncing them with the Cassandra table test_keyspace.checkpoint. <br />
-On Start up the app will read the offsets from this table and do one of three things for each partition in Kafka: <br />
-1) Get earliest offset for a partition with no offsets in the checkpoint table <br />
-    a) This may happen if a topic was dropped and recreated or a new partition was added <br />
-2) Get earliest or latest offsets for a partition if the current offsets in the checkpoint table are past the latest offsets <br />
-    a) Uses offsetOverride parameter in config.yaml to determine earliest or latest <br />
-3) Use existing offsets from the checkpoint table for a partition <br />
+On Start up the app will read the offsets from this table and do one of three things for each partition in Kafka:
+<OL>
+<LI>Get earliest offset for a partition with no offsets in the checkpoint table
+<UL>
+<LI>This may happen if a topic was dropped and recreated or a new partition was added
+</UL>
+<LI>Get earliest or latest offsets for a partition if the current offsets in the checkpoint table are past the latest offsets
+<UL>
+<LI>Uses offsetOverride parameter in config.yaml to determine earliest or latest
+</UL>
+<LI>Use existing offsets from the checkpoint table for a partition
+</OL>
 
 ##Sample Kafka Commands
 ###Windows (Unix/Linux are similar)
