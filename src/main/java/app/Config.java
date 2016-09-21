@@ -1,12 +1,14 @@
 package app;
 
+import app.enums.OffsetType;
+
 import java.util.Map;
 
 public class Config {
     private String appName;
     private String master;
     private String directory;
-    private String offsetOverride;
+    private OffsetType offsetOverride;
     private Map<String, String> sparkConfigs;
     private Map<String, Map<String, String>> kafkaAppConfigs;
     private Map<String, Map<String, String>> cassandraTables;
@@ -35,12 +37,12 @@ public class Config {
         this.directory = directory;
     }
 
-    public String getOffsetOverride() {
+    public OffsetType getOffsetOverride() {
         return offsetOverride;
     }
 
     public void setOffsetOverride(String offsetOverride) {
-        this.offsetOverride = offsetOverride;
+        this.offsetOverride = OffsetType.valueOf(offsetOverride);
     }
 
     public Map<String, String> getSparkConfigs() {

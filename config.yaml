@@ -11,6 +11,7 @@ sparkConfigs:
     #spark.cassandra.connection.local_dc: --use if you have more than one data center
     spark.cassandra.connection.keep_alive_ms: 180000
     spark.cassandra.input.consistency.level: LOCAL_QUORUM
+    spark.serializer: org.apache.spark.serializer.KryoSerializer
 #kafka configs
 kafkaAppConfigs:
     obj1App:

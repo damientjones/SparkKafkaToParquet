@@ -25,10 +25,9 @@ object KafkaUtil {
   }
 
   private def determineOffset(checkpoint: (TopicAndPartition, Option[Long]), earliest: Long, latest: Long): (TopicAndPartition, Long) = {
-    val offsetOverride = OffsetType.valueOf(YamlUtil.getConfigs.getOffsetOverride)
     val offset = checkpoint._2 match {
       case x if x.isEmpty => earliest
-      case x if x.get > latest => offsetOverride match {
+      case x if x.get > latest => YamlUtil.getConfigs.getOffsetOverride match {
         case LATEST => latest
         case _ => earliest
       }
@@ -41,7 +40,9 @@ object KafkaUtil {
     val checkpoint = getOffsets(kafkaParams, topics, CHECKPOINT)
     val latest = getLatestOffsets(kafkaParams: Map[String, String], topics: String)
     val earliest = getEarliestOffsets(kafkaParams: Map[String, String], topics: String)
-    checkpoint.map(x => determineOffset(x, FunctionUtil.unboxMap(earliest, x._1), FunctionUtil.unboxMap(latest, x._1)))
+    checkpoint.map(x => determineOffset(x,
+      FunctionUtil.extractFromMap(earliest, x._1),
+      FunctionUtil.extractFromMap(latest, x._1)))
   }
 
   private def getOffsets(kafkaParams: Map[String, String], topics: String, offsetType: OffsetType): Map[TopicAndPartition, Option[Long]] = {
