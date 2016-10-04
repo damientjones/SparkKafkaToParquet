@@ -31,15 +31,15 @@ object SparkContextUtil {
   def createStreamingContext {
     val configs = YamlUtil.getConfigs
     val streamConfigs = configs.kafkaAppConfigs.get(configs.appName)
-    val batchInterval = getBatchInterval(streamConfigs.get("batchIntervalUnit"),
-      streamConfigs.get("batchInterval").toInt)
+    val batchInterval = getBatchInterval(streamConfigs.batchIntervalUnit,
+      streamConfigs.batchInterval.toInt)
     ssc = new StreamingContext(sc, batchInterval)
   }
 
   def createStream {
     val configs = YamlUtil.getConfigs
     val streamConfigs = configs.kafkaAppConfigs.get(configs.appName)
-    KafkaUtil.createStream(streamConfigs.get("brokerList"), streamConfigs.get("topicList"))
+    KafkaUtil.createStream(streamConfigs.brokerList, streamConfigs.topicList)
   }
 
   def getStreamingContext = {

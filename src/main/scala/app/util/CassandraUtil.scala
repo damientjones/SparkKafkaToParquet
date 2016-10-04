@@ -7,19 +7,19 @@ object CassandraUtil {
     val tableMetadata = YamlUtil.getConfigs.cassandraTables.get(table)
     SparkContextUtil.getSqlContext.read
       .format("org.apache.spark.sql.cassandra")
-      .options(Map("table" -> tableMetadata.get("table"),
-        "keyspace" -> tableMetadata.get("keyspace"),
+      .options(Map("table" -> tableMetadata.table,
+        "keyspace" -> tableMetadata.keyspace,
         "pushdown" -> "false"))
       .load()
-      .selectExpr(tableMetadata.get("fields").split(",").toSeq: _*)
+      .selectExpr(tableMetadata.fields.split(",").toSeq: _*)
   }
 
   def saveDataframe(table: String, df: DataFrame) {
     val tableMetadata = YamlUtil.getConfigs.cassandraTables.get(table)
     df.write
       .format("org.apache.spark.sql.cassandra")
-      .options(Map("table" -> tableMetadata.get("table"),
-        "keyspace" -> tableMetadata.get("keyspace")))
+      .options(Map("table" -> tableMetadata.table,
+        "keyspace" -> tableMetadata.keyspace))
       .mode(SaveMode.Overwrite)
       .save()
   }

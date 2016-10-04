@@ -12,10 +12,7 @@ import scala.collection.concurrent.TrieMap
 
 protected class StreamingMetrics(sc: SparkContext) extends StreamingListener {
 
-  val jobMetricsMetadata = YamlUtil.getConfigs.cassandraTables.get("jobMetrics")
-  val jobMetricsTableName = jobMetricsMetadata.get("table")
-  val jobMetricsKeyspace = jobMetricsMetadata.get("keyspace")
-  val jobMetricsFields = jobMetricsMetadata.get("fields")
+  val jobMetricsMetadata = YamlUtil.getConfigs.cassandraTables.get("job_metrics")
 
   private object enum {
 
@@ -31,10 +28,14 @@ protected class StreamingMetrics(sc: SparkContext) extends StreamingListener {
 
   private val session = SparkContextUtil.getCassandraConnector.openSession()
   private val insert = YamlUtil.getConfigs.insertStatement
-  private val stmt = session.prepare(insert.format(jobMetricsKeyspace,
-    jobMetricsTableName,
-    jobMetricsFields,
-    jobMetricsFields.split(",").map(x => "?").mkString(",")))
+  println(insert.format(jobMetricsMetadata.keyspace,
+    jobMetricsMetadata.table,
+    jobMetricsMetadata.fields,
+    jobMetricsMetadata.fields.split(",").map(x => "?").mkString(",")))
+  private val stmt = session.prepare(insert.format(jobMetricsMetadata.keyspace,
+    jobMetricsMetadata.table,
+    jobMetricsMetadata.fields,
+    jobMetricsMetadata.fields.split(",").map(x => "?").mkString(",")))
 
   private val sdf = new SimpleDateFormat("yyyyMMdd")
   private val appName: String = sc.appName

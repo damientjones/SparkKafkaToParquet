@@ -7,8 +7,8 @@ import org.apache.spark.streaming.kafka.KafkaUtil
 
 object MainObject {
 
-  def build(fileName: String) = {
-    YamlUtil.parseYaml(fileName)
+  def build(appName: String, fileName: String) = {
+    YamlUtil.parseYaml(appName, fileName)
     SparkContextUtil.createStreamingContext
     SparkContextUtil.createStream
     val ssc = SparkContextUtil.getStreamingContext
@@ -22,7 +22,7 @@ object MainObject {
   }
 
   def main (args:Array[String]): Unit = {
-    val ssc = build(args(0))
+    val ssc = build(args(0), args(1))
     implicit val appName = YamlUtil.getConfigs.appName
     val offsets = AppOffsets(appName, None)
     val stream = KafkaUtil.getStream

@@ -11,10 +11,12 @@ object YamlUtil {
   private var configInd: Boolean = false
   private var config: Config = _
 
-  def parseYaml(fileName: String) {
+  def parseYaml(appName: String, fileName: String) {
     if (!configInd) {
-      val reader = new YamlReader(new FileReader("config.yaml"))
+      val reader = new YamlReader(new FileReader(fileName))
       config = reader.read(classOf[Config])
+      println(config)
+      config.appName = appName
       configInd = true
     }
   }
