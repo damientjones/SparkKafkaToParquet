@@ -24,7 +24,7 @@ These will print out messages. This can also be used to log metrics to the log f
 </UL>
 </UL>
 
-## General KafkaDirectStream information:
+## General KafkaDirectStream app information:
 The application manages offsets by syncing them with the Cassandra table test_keyspace.checkpoint. <br />
 On Start up the app will read the offsets from this table and do one of three things for each partition in Kafka:
 <OL>
@@ -38,6 +38,8 @@ On Start up the app will read the offsets from this table and do one of three th
 </UL>
 <LI>Use existing offsets from the checkpoint table for a partition
 </OL>
+
+The app uses a custom KafkaMessage object which contains the topic name, offset, key, and message for each message read from Kafka. This is through using a custom message handler and the MessageAndMetadata case class.
 
 ##Sample Kafka Commands
 ###Windows (Unix/Linux are similar)
