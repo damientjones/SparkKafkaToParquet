@@ -78,7 +78,7 @@ object Checkpoint {
 
   def getOffsets(topicPartitionSet: Set[TopicAndPartition]): Map[TopicAndPartition, Option[Long]] = {
     val checkpoints = getData
-    val appName = YamlUtil.getConfigs.getAppName
+    val appName = YamlUtil.getConfigs.appName
     topicPartitionSet.map(x => {
       (x, checkpoints.get(appName, x.topic, x.partition).map(x => evalOffset(x)))
     }).toMap

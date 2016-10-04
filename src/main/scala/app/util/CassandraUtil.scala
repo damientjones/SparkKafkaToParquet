@@ -4,7 +4,7 @@ import org.apache.spark.sql.{DataFrame, SaveMode}
 
 object CassandraUtil {
   def getDataframe(table: String) = {
-    val tableMetadata = YamlUtil.getConfigs.getCassandraTables.get(table)
+    val tableMetadata = YamlUtil.getConfigs.cassandraTables.get(table)
     SparkContextUtil.getSqlContext.read
       .format("org.apache.spark.sql.cassandra")
       .options(Map("table" -> tableMetadata.get("table"),
@@ -15,7 +15,7 @@ object CassandraUtil {
   }
 
   def saveDataframe(table: String, df: DataFrame) {
-    val tableMetadata = YamlUtil.getConfigs.getCassandraTables.get(table)
+    val tableMetadata = YamlUtil.getConfigs.cassandraTables.get(table)
     df.write
       .format("org.apache.spark.sql.cassandra")
       .options(Map("table" -> tableMetadata.get("table"),

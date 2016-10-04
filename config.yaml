@@ -1,7 +1,10 @@
 #app parameters
-master: local[*]
-directory: c:\\data\\
-offsetOverride: EARLIEST
+appName: "obj1App"
+master: "local[*]"
+directory: "c:\\data\\"
+defaultKeyspace: "test_keyspace"
+offsetOverride: "EARLIEST"
+insertStatement: "INSERT INTO %s.%s (%s) VALUES (%s)"
 
 #spark parameters
 sparkConfigs:
@@ -19,10 +22,13 @@ kafkaAppConfigs:
         topicList: OBJ1
         batchInterval: "10"
         batchIntervalUnit: Seconds
-        consumerGroup: group
 #cassandra tables
 cassandraTables:
     checkpoint:
         table: checkpoint
         keyspace: test_keyspace
         fields: app_name,topic_name,partition,checkpoint_time,start_offset,end_offset
+    jobMetrics:
+        table: job_metrics
+        keyspace: test_keyspace
+        fields: batch_date,app_name,batch_time,status,application_id,master,sched_delay,prcsg_delay,total_delay,record_count,throughput,tot_sched_delay_dly,tot_prcsg_delay_dly,total_delay_dly,tot_recs_prcsd_dly,avg_throughput_dly

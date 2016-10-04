@@ -1,26 +1,29 @@
 package app.util
 
-import java.io.InputStream
-import java.nio.file.{Files, Paths}
+import java.io.FileReader
 
 import app.Config
-import org.yaml.snakeyaml.Yaml
-import org.yaml.snakeyaml.constructor.Constructor
+import com.esotericsoftware.yamlbeans.YamlReader
 
-import scala.util.Try
+import scala.collection.JavaConverters._
 
 object YamlUtil {
-  private var config: Config = null
+  private var configInd: Boolean = false
+  private var config: Config = _
 
-  def setYamlConfigs(appName: String) {
-    if (config == null) {
-      val in: InputStream = Try(Files.newInputStream(Paths.get("config.yaml"))).get
-      config = new Yaml(new Constructor(classOf[Config])).load(in).asInstanceOf[Config]
-      config.setAppName(appName)
+  def parseYaml(fileName: String) {
+    if (!configInd) {
+      val reader = new YamlReader(new FileReader("config.yaml"))
+      config = reader.read(classOf[Config])
+      configInd = true
     }
   }
 
   def getConfigs = {
     config
+  }
+
+  def getSparkConfigs = {
+    config.sparkConfigs.asScala.toMap
   }
 }

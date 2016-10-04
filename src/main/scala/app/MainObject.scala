@@ -7,12 +7,13 @@ import org.apache.spark.streaming.kafka.KafkaUtil
 
 object MainObject {
 
-  def build(appName: String) = {
-    YamlUtil.setYamlConfigs(appName)
-    SparkContextUtil.createContext
+  def build(fileName: String) = {
+    YamlUtil.parseYaml(fileName)
+    SparkContextUtil.createStreamingContext
+    SparkContextUtil.createStream
     val ssc = SparkContextUtil.getStreamingContext
-    ssc.addStreamingListener(StreamingMetrics.getMetrics(ssc.sparkContext)) //Streaming metrics class
-    ssc.sparkContext.addSparkListener(SparkMetrics.getMetrics) //Spark metrics class
+    ssc.addStreamingListener(StreamingMetrics.getMetrics(ssc.sparkContext))
+    ssc.sparkContext.addSparkListener(SparkMetrics.getMetrics)
     ssc
   }
 
@@ -22,7 +23,7 @@ object MainObject {
 
   def main (args:Array[String]): Unit = {
     val ssc = build(args(0))
-    implicit val appName = YamlUtil.getConfigs.getAppName
+    implicit val appName = YamlUtil.getConfigs.appName
     val offsets = AppOffsets(appName, None)
     val stream = KafkaUtil.getStream
     stream.foreachRDD { rdd =>

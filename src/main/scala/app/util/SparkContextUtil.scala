@@ -1,17 +1,21 @@
 package app.util
 
-import org.apache.spark.SparkConf
+import com.datastax.spark.connector.cql.{CassandraConnector, CassandraConnectorConf}
 import org.apache.spark.sql.cassandra.CassandraSQLContext
 import org.apache.spark.streaming.kafka.KafkaUtil
 import org.apache.spark.streaming.{Minutes, Seconds, StreamingContext}
-
-import scala.collection.JavaConverters._
+import org.apache.spark.{SparkConf, SparkContext}
 
 object SparkContextUtil {
-  private var sparkConf: SparkConf = _
-  private var streamingContext: StreamingContext = _
-  private var cassandraSqlContext: CassandraSQLContext = _
-  private var varsSet: Boolean = false
+  lazy private val sparkConf: SparkConf = {
+    val conf = new SparkConf().setAppName(YamlUtil.getConfigs.appName).setMaster(YamlUtil.getConfigs.master)
+    YamlUtil.getSparkConfigs.foreach(x => conf.set(x._1, x._2))
+    conf
+  }
+  lazy private val sc: SparkContext = new SparkContext(sparkConf)
+  lazy private val csc: CassandraSQLContext = new CassandraSQLContext(sc)
+  lazy private val cc: CassandraConnector = new CassandraConnector(CassandraConnectorConf(sparkConf))
+  private var ssc: StreamingContext = _
 
   private def getBatchInterval(unit: String, interval: Int) = {
     unit match {
@@ -20,36 +24,34 @@ object SparkContextUtil {
     }
   }
 
-  private def getConfigs() = {
-    val configs = YamlUtil.getConfigs
-    val appName = configs.getAppName
-    val master = configs.getMaster
-    val sparkConfigs = configs.getSparkConfigs.asScala.toMap
-    val streamConfigs = configs.getKafkaAppConfigs.get(configs.getAppName)
-    val batchInterval = getBatchInterval(streamConfigs.get("batchIntervalUnit"),
-      streamConfigs.get("batchInterval").toInt)
-    val topicList = streamConfigs.get("topicList")
-    val brokerList = streamConfigs.get("brokerList")
-    (appName, master, sparkConfigs, batchInterval, topicList, brokerList)
+  private def setStreamingContext() = {
+
   }
 
-  def createContext {
-    if (!varsSet) {
-      val (appName, master, sparkConfigs, interval, topicList, brokerList) = getConfigs()
-      sparkConf = new SparkConf().setAppName(appName).setMaster(master)
-      sparkConfigs.foreach(x => sparkConf.set(x._1, x._2))
-      streamingContext = new StreamingContext(sparkConf, interval)
-      cassandraSqlContext = new CassandraSQLContext(streamingContext.sparkContext)
-      KafkaUtil.createStream(brokerList, topicList)
-      varsSet = true
-    }
+  def createStreamingContext {
+    val configs = YamlUtil.getConfigs
+    val streamConfigs = configs.kafkaAppConfigs.get(configs.appName)
+    val batchInterval = getBatchInterval(streamConfigs.get("batchIntervalUnit"),
+      streamConfigs.get("batchInterval").toInt)
+    ssc = new StreamingContext(sc, batchInterval)
+  }
+
+  def createStream {
+    val configs = YamlUtil.getConfigs
+    val streamConfigs = configs.kafkaAppConfigs.get(configs.appName)
+    KafkaUtil.createStream(streamConfigs.get("brokerList"), streamConfigs.get("topicList"))
   }
 
   def getStreamingContext = {
-    streamingContext
+    ssc
   }
 
   def getSqlContext = {
-    cassandraSqlContext
+    csc.setKeyspace(YamlUtil.getConfigs.defaultKeyspace)
+    csc
+  }
+
+  def getCassandraConnector = {
+    cc
   }
 }

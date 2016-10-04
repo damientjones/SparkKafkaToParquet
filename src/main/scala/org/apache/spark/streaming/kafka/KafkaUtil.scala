@@ -27,7 +27,7 @@ object KafkaUtil {
   private def determineOffset(checkpoint: (TopicAndPartition, Option[Long]), earliest: Long, latest: Long): (TopicAndPartition, Long) = {
     val offset = checkpoint._2 match {
       case x if x.isEmpty => earliest
-      case x if x.get > latest => YamlUtil.getConfigs.getOffsetOverride match {
+      case x if x.get > latest => YamlUtil.getConfigs.offsetOverride match {
         case LATEST => latest
         case _ => earliest
       }

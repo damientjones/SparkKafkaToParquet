@@ -17,7 +17,7 @@ object CreateParquetUtil {
   val dateUdf = udf(dateToString _)
 
   def writeObj1Parquet(rdd: RDD[String]) {
-    val fileName = YamlUtil.getConfigs.getDirectory + "\\" + "OBJ1"
+    val fileName = YamlUtil.getConfigs.directory + "\\" + "OBJ1"
     SparkMetrics.setExecutorInfo("Creating parquet file")
     rdd.flatMap(x => {
       Obj1.extract(x)
