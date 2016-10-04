@@ -10,7 +10,7 @@ App name: <br />
 ex: obj1App
 
 ## The project includes a StreamingListener and a SparkListener
-These will print out messages. This can also be used to log metrics to the log file or to a database table.
+The Streaming Listener will log basic metrics to a job_metrics table in Cassandra. The Spark listener will print out messages to the console.
 
 ## A few notes
 <UL>
