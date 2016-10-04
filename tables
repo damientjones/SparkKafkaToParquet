@@ -1,0 +1,53 @@
+DROP KEYSPACE IF EXISTS test_keyspace;
+
+CREATE KEYSPACE test_keyspace
+WITH durable_writes = true
+AND replication = {
+  'class' : 'SimpleStrategy',
+  'replication_factor' : 1
+};
+
+DROP TABLE IF EXISTS test_keyspace.checkpoint;
+
+CREATE TABLE IF NOT EXISTS test_keyspace.checkpoint
+(app_name text,
+ topic_name text,
+ partition int,
+ checkpoint_time timestamp,
+ completion_time timestamp,
+ end_offset bigint,
+ start_offset bigint,
+ PRIMARY KEY (app_name, topic_name, partition)
+) WITH compression = {
+  'class' : 'LZ4Compressor'
+}
+AND compaction = {
+  'class' : 'DateTieredCompactionStrategy'
+};
+
+DROP TABLE IF EXISTS test_keyspace.job_metrics;
+
+CREATE TABLE IF NOT EXISTS test_keyspace.job_metrics
+(batch_date text,
+ app_name text,
+ batch_time timestamp,
+ status text,
+ application_id text,
+ master text,
+ sched_delay bigint,
+ prcsg_delay bigint,
+ total_delay bigint,
+ record_count bigint,
+ throughput bigint,
+ tot_sched_delay_dly bigint,
+ tot_prcsg_delay_dly bigint,
+ total_delay_dly bigint,
+ tot_recs_prcsd_dly bigint,
+ avg_throughput_dly bigint,
+ PRIMARY KEY((batch_date, app_name), batch_time))
+WITH compression = {
+  'class' : 'LZ4Compressor'
+}
+AND compaction = {
+  'class' : 'DateTieredCompactionStrategy'
+};
