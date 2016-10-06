@@ -13,7 +13,7 @@ object MainObject {
     SparkContextUtil.createStream
     val ssc = SparkContextUtil.getStreamingContext
     ssc.addStreamingListener(StreamingMetrics.getMetrics(ssc.sparkContext))
-    ssc.sparkContext.addSparkListener(SparkMetrics.getMetrics)
+    ssc.sparkContext.addSparkListener(SparkMetrics.getMetrics(ssc.sparkContext))
     ssc
   }
 

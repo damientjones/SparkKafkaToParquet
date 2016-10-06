@@ -3,7 +3,6 @@ package app.util
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 
-import app.metrics.SparkMetrics
 import app.schema.Obj1
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SaveMode
@@ -18,11 +17,10 @@ object CreateParquetUtil {
 
   def writeObj1Parquet(rdd: RDD[String]) {
     val fileName = YamlUtil.getConfigs.directory + "\\" + "OBJ1"
-    SparkMetrics.setExecutorInfo("Creating parquet file")
     rdd.flatMap(x => {
       Obj1.extract(x)
     })
-      .toDF
+      .toDF()
       .withColumn("date",dateUdf($"time"))
       .write
       .mode(SaveMode.Append)

@@ -27,7 +27,11 @@ cassandraTables:
         table: "checkpoint"
         keyspace: "test_keyspace"
         fields: "app_name,topic_name,partition,checkpoint_time,start_offset,end_offset"
+    batch_metrics: !app.TableInfo
+        table: "batch_metrics"
+        keyspace: "test_keyspace"
+        fields: "batch_date,app_name,batch_time,status,application_id,master,sched_delay,prcsg_delay,total_delay,record_count,throughput,tot_sched_delay_dly,tot_prcsg_delay_dly,total_delay_dly,tot_recs_prcsd_dly,avg_throughput_dly"
     job_metrics: !app.TableInfo
         table: "job_metrics"
         keyspace: "test_keyspace"
-        fields: "batch_date,app_name,batch_time,status,application_id,master,sched_delay,prcsg_delay,total_delay,record_count,throughput,tot_sched_delay_dly,tot_prcsg_delay_dly,total_delay_dly,tot_recs_prcsd_dly,avg_throughput_dly"
+        fields: "batch_date,app_name,job_id,batch_time,application_id,master,job_info,job_start_time,job_end_time,prcsg_time"

@@ -15,7 +15,6 @@ object YamlUtil {
     if (!configInd) {
       val reader = new YamlReader(new FileReader(fileName))
       config = reader.read(classOf[Config])
-      println(config)
       config.appName = appName
       configInd = true
     }

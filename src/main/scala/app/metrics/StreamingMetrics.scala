@@ -3,7 +3,7 @@ package app.metrics
 import java.sql.{Date, Timestamp}
 import java.text.SimpleDateFormat
 
-import app.schema.JobMetrics
+import app.schema.BatchMetrics
 import app.util.{SparkContextUtil, YamlUtil}
 import org.apache.spark.SparkContext
 import org.apache.spark.streaming.scheduler._
@@ -12,30 +12,21 @@ import scala.collection.concurrent.TrieMap
 
 protected class StreamingMetrics(sc: SparkContext) extends StreamingListener {
 
-  val jobMetricsMetadata = YamlUtil.getConfigs.cassandraTables.get("job_metrics")
+  private val batchMetricsMetadata = YamlUtil.getConfigs.cassandraTables.get("batch_metrics")
 
   private object enum {
-
     sealed trait Status
-
     case object SUBMITTED extends Status
-
     case object STARTED extends Status
-
     case object COMPLETE extends Status
-
   }
 
   private val session = SparkContextUtil.getCassandraConnector.openSession()
   private val insert = YamlUtil.getConfigs.insertStatement
-  println(insert.format(jobMetricsMetadata.keyspace,
-    jobMetricsMetadata.table,
-    jobMetricsMetadata.fields,
-    jobMetricsMetadata.fields.split(",").map(x => "?").mkString(",")))
-  private val stmt = session.prepare(insert.format(jobMetricsMetadata.keyspace,
-    jobMetricsMetadata.table,
-    jobMetricsMetadata.fields,
-    jobMetricsMetadata.fields.split(",").map(x => "?").mkString(",")))
+  private val stmt = session.prepare(insert.format(batchMetricsMetadata.keyspace,
+    batchMetricsMetadata.table,
+    batchMetricsMetadata.fields,
+    batchMetricsMetadata.fields.split(",").map(x => "?").mkString(",")))
 
   private val sdf = new SimpleDateFormat("yyyyMMdd")
   private val appName: String = sc.appName
@@ -45,92 +36,89 @@ protected class StreamingMetrics(sc: SparkContext) extends StreamingListener {
   private val totPrcsgDelayDly = sc.accumulator(0L)
   private val totalDelayDly = sc.accumulator(0L)
   private val totRecsPrcsdDly = sc.accumulator(0L)
-  private val subBatchMap = TrieMap.empty[Long, JobMetrics]
-  private val startedBatchMap = TrieMap.empty[Long, JobMetrics]
+  private val subBatchMap = TrieMap.empty[Long, BatchMetrics]
+  private val startedBatchMap = TrieMap.empty[Long, BatchMetrics]
 
   private def removeOldPrcsgBatches(time: Long) {
     startedBatchMap
       .keys
-      .filter(x => x != time)
+      .filter(x => x < time)
       .foreach(x => startedBatchMap.remove(x))
   }
 
-  private def getJobMetrics(status: enum.Status, batchInfo: BatchInfo) = {
+  private def getBatchMetrics(status: enum.Status, batchInfo: BatchInfo) = {
     val time = batchInfo.batchTime.milliseconds
-    val jobMetrics = status match {
-      case enum.SUBMITTED => {
+    val batchMetrics = status match {
+      case enum.SUBMITTED =>
         val date = sdf.format(new Date(time))
-        val jobMetrics = JobMetrics(date,
+        val batchMetrics = BatchMetrics(date,
           appName,
           new Timestamp(time),
           "SUBMITTED",
           applicationId,
           master)
-        jobMetrics.totalDelayDly = totalDelayDly.value
-        jobMetrics.totPrcsgDelayDly = totPrcsgDelayDly.value
-        jobMetrics.totRecsPrcsdDly = totRecsPrcsdDly.value
-        jobMetrics.totSchedDelayDly = totSchedDelayDly.value
-        if (jobMetrics.totalDelayDly != 0) {
-          jobMetrics.avgThroughputDly = jobMetrics.totRecsPrcsdDly / jobMetrics.totalDelayDly
+        batchMetrics.totalDelayDly = totalDelayDly.value
+        batchMetrics.totPrcsgDelayDly = totPrcsgDelayDly.value
+        batchMetrics.totRecsPrcsdDly = totRecsPrcsdDly.value
+        batchMetrics.totSchedDelayDly = totSchedDelayDly.value
+        if (batchMetrics.totalDelayDly != 0) {
+          batchMetrics.avgThroughputDly = batchMetrics.totRecsPrcsdDly / batchMetrics.totalDelayDly
         } else {
-          jobMetrics.avgThroughputDly = jobMetrics.totRecsPrcsdDly / 1
+          batchMetrics.avgThroughputDly = batchMetrics.totRecsPrcsdDly / 1
         }
-        jobMetrics.recordCount = batchInfo.numRecords
-        subBatchMap.put(time, jobMetrics)
-        jobMetrics
-      }
-      case enum.STARTED => {
-        val jobMetrics = subBatchMap.get(time).get
+        batchMetrics.recordCount = batchInfo.numRecords
+        subBatchMap.put(time, batchMetrics)
+        batchMetrics
+      case enum.STARTED =>
+        val batchMetrics = subBatchMap.get(time).get
         subBatchMap.remove(time)
-        jobMetrics.status = "STARTED"
-        jobMetrics.schedDelay = batchInfo.schedulingDelay.get
-        totSchedDelayDly += jobMetrics.schedDelay
-        jobMetrics.totSchedDelayDly = totSchedDelayDly.value
-        startedBatchMap.put(time, jobMetrics)
+        batchMetrics.status = "STARTED"
+        batchMetrics.schedDelay = batchInfo.schedulingDelay.get
+        totSchedDelayDly += batchMetrics.schedDelay
+        batchMetrics.totSchedDelayDly = totSchedDelayDly.value
+        startedBatchMap.put(time, batchMetrics)
         removeOldPrcsgBatches(time)
-        jobMetrics
-      }
-      case enum.COMPLETE => {
-        val jobMetrics = startedBatchMap.get(time).get
+        batchMetrics
+      case enum.COMPLETE =>
+        val batchMetrics = startedBatchMap.get(time).get
         startedBatchMap.remove(time)
-        jobMetrics.status = "COMPLETED"
-        jobMetrics.prcsgDelay = batchInfo.processingDelay.get
-        jobMetrics.totalDelay = jobMetrics.schedDelay + jobMetrics.prcsgDelay
-        if (jobMetrics.totalDelay != 0) {
-          jobMetrics.throughput = jobMetrics.recordCount / jobMetrics.totalDelay
+        batchMetrics.status = "COMPLETED"
+        batchMetrics.prcsgDelay = batchInfo.processingDelay.get
+        batchMetrics.totalDelay = batchMetrics.schedDelay + batchMetrics.prcsgDelay
+        if (batchMetrics.totalDelay != 0) {
+          batchMetrics.throughput = batchMetrics.recordCount / batchMetrics.totalDelay
         } else {
-          jobMetrics.throughput = jobMetrics.recordCount / 1
+          batchMetrics.throughput = batchMetrics.recordCount / 1
         }
-        totPrcsgDelayDly += jobMetrics.prcsgDelay
-        totalDelayDly += jobMetrics.totalDelayDly
-        totRecsPrcsdDly += jobMetrics.recordCount
-        jobMetrics.totRecsPrcsdDly = totRecsPrcsdDly.value
-        jobMetrics.totPrcsgDelayDly = totPrcsgDelayDly.value
-        jobMetrics.totalDelayDly = totalDelayDly.value
-        if (jobMetrics.totalDelayDly != 0) {
-          jobMetrics.avgThroughputDly = jobMetrics.totRecsPrcsdDly / jobMetrics.totalDelayDly
+        totPrcsgDelayDly += batchMetrics.prcsgDelay
+        totalDelayDly += batchMetrics.totalDelayDly
+        totRecsPrcsdDly += batchMetrics.recordCount
+        batchMetrics.totRecsPrcsdDly = totRecsPrcsdDly.value
+        batchMetrics.totPrcsgDelayDly = totPrcsgDelayDly.value
+        batchMetrics.totalDelayDly = totalDelayDly.value
+        if (batchMetrics.totalDelayDly != 0) {
+          batchMetrics.avgThroughputDly = batchMetrics.totRecsPrcsdDly / batchMetrics.totalDelayDly
         } else {
-          jobMetrics.avgThroughputDly = jobMetrics.totRecsPrcsdDly / 1
+          batchMetrics.avgThroughputDly = batchMetrics.totRecsPrcsdDly / 1
         }
-        jobMetrics
-      }
+        batchMetrics
     }
-    jobMetrics.productIterator.map(x => x.asInstanceOf[Object]).toList
-    val statement = stmt.bind(jobMetrics.productIterator.map(x => x.asInstanceOf[Object]).toSeq: _*)
-    println(statement)
+    batchMetrics.productIterator.map(x => x.asInstanceOf[Object]).toList
+    val statement = stmt.bind(batchMetrics.productIterator.map(x => x.asInstanceOf[Object]).toSeq: _*)
     session.execute(statement)
   }
 
   override def onBatchCompleted(batchCompleted: StreamingListenerBatchCompleted) {
-    getJobMetrics(enum.COMPLETE, batchCompleted.batchInfo)
+    getBatchMetrics(enum.COMPLETE, batchCompleted.batchInfo)
   }
 
   override def onBatchStarted(batchStarted: StreamingListenerBatchStarted) {
-    getJobMetrics(enum.STARTED, batchStarted.batchInfo)
+    getBatchMetrics(enum.STARTED, batchStarted.batchInfo)
+    SparkMetrics.setBatchTime(batchStarted.batchInfo.batchTime.milliseconds)
   }
 
   override def onBatchSubmitted(batchSubmitted: StreamingListenerBatchSubmitted) {
-    getJobMetrics(enum.SUBMITTED, batchSubmitted.batchInfo)
+    getBatchMetrics(enum.SUBMITTED, batchSubmitted.batchInfo)
   }
 
 }
