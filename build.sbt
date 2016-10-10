@@ -2,7 +2,7 @@ name := "Operations"
 
 version := "1.0"
 
-scalaVersion := "2.11.0"
+scalaVersion := "2.11.4"
 
 val spark = "org.apache.spark"
 val snapshot = "1.5.1"

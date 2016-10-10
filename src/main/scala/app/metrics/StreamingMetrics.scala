@@ -4,15 +4,12 @@ import java.sql.{Date, Timestamp}
 import java.text.SimpleDateFormat
 
 import app.schema.BatchMetrics
-import app.util.{SparkContextUtil, YamlUtil}
 import org.apache.spark.SparkContext
 import org.apache.spark.streaming.scheduler._
 
 import scala.collection.concurrent.TrieMap
 
-protected class StreamingMetrics(sc: SparkContext) extends StreamingListener {
-
-  private val batchMetricsMetadata = YamlUtil.getConfigs.cassandraTables.get("batch_metrics")
+protected class StreamingMetrics(sc: SparkContext) extends ProcessCaseClass[BatchMetrics] with StreamingListener {
 
   private object enum {
     sealed trait Status
@@ -20,13 +17,6 @@ protected class StreamingMetrics(sc: SparkContext) extends StreamingListener {
     case object STARTED extends Status
     case object COMPLETE extends Status
   }
-
-  private val session = SparkContextUtil.getCassandraConnector.openSession()
-  private val insert = YamlUtil.getConfigs.insertStatement
-  private val stmt = session.prepare(insert.format(batchMetricsMetadata.keyspace,
-    batchMetricsMetadata.table,
-    batchMetricsMetadata.fields,
-    batchMetricsMetadata.fields.split(",").map(x => "?").mkString(",")))
 
   private val sdf = new SimpleDateFormat("yyyyMMdd")
   private val appName: String = sc.appName
@@ -103,9 +93,7 @@ protected class StreamingMetrics(sc: SparkContext) extends StreamingListener {
         }
         batchMetrics
     }
-    batchMetrics.productIterator.map(x => x.asInstanceOf[Object]).toList
-    val statement = stmt.bind(batchMetrics.productIterator.map(x => x.asInstanceOf[Object]).toSeq: _*)
-    session.execute(statement)
+    insert(batchMetrics)
   }
 
   override def onBatchCompleted(batchCompleted: StreamingListenerBatchCompleted) {

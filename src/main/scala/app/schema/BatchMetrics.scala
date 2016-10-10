@@ -2,19 +2,33 @@ package app.schema
 
 import java.sql.Timestamp
 
-case class BatchMetrics(date: String,
+import app.annotation.DefaultValue
+
+import scala.annotation.meta.field
+
+case class BatchMetrics(batchDate: String,
                         appName: String,
                         batchTime: Timestamp,
                         var status: String,
                         applicationId: String,
                         master: String,
-                        var schedDelay: Long = 0L,
-                        var prcsgDelay: Long = 0L,
-                        var totalDelay: Long = 0L,
-                        var recordCount: Long = 0L,
-                        var throughput: Long = 0L,
-                        var totSchedDelayDly: Long = 0L,
-                        var totPrcsgDelayDly: Long = 0L,
-                        var totalDelayDly: Long = 0L,
-                        var totRecsPrcsdDly: Long = 0L,
-                        var avgThroughputDly: Long = 0L)
+                        @(DefaultValue @field)("-1")
+                        var schedDelay: Long = -1L,
+                        @(DefaultValue @field)("-1")
+                        var prcsgDelay: Long = -1L,
+                        @(DefaultValue @field)("-1")
+                        var totalDelay: Long = -1L,
+                        @(DefaultValue @field)("-1")
+                        var recordCount: Long = -1L,
+                        @(DefaultValue @field)("-1")
+                        var throughput: Long = -1L,
+                        @(DefaultValue @field)("-1")
+                        var totSchedDelayDly: Long = -1L,
+                        @(DefaultValue @field)("-1")
+                        var totPrcsgDelayDly: Long = -1L,
+                        @(DefaultValue @field)("-1")
+                        var totalDelayDly: Long = -1L,
+                        @(DefaultValue @field)("-1")
+                        var totRecsPrcsdDly: Long = -1L,
+                        @(DefaultValue @field)("-1")
+                        var avgThroughputDly: Long = -1L)

@@ -20,7 +20,7 @@ object CreateParquetUtil {
     rdd.flatMap(x => {
       Obj1.extract(x)
     })
-      .toDF()
+      .toDF
       .withColumn("date",dateUdf($"time"))
       .write
       .mode(SaveMode.Append)
