@@ -10,7 +10,7 @@ App name: <br />
 ex: obj1App
 
 ## The project includes a StreamingListener and a SparkListener
-The Streaming Listener will log basic metrics to a job_metrics table in Cassandra. The Spark listener will print out messages to the console.
+The Streaming Listener and Spark Listener will log basic metrics to the batch_metrics and job_metrics tables respectively in Cassandra. The application will not insert nulls or default values into the metric tables.
 
 ## A few notes
 <UL>
